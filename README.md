@@ -1,7 +1,7 @@
 # Quantum Lens
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.0-green.svg)](main)
+[![Version](https://img.shields.io/badge/version-1.0-green.svg)](https://github.com/primeline-ai/quantum-lens/releases/tag/v1.0)
 [![Works with Claude Code](https://img.shields.io/badge/works%20with-Claude%20Code-orange.svg)](main)
 
 **Analysis that sees what you don't.** 7 cognitive lenses run in parallel, each with a structurally distinct way of perceiving your input. Where they agree - high confidence. Where they clash - breakthrough candidates. Where conventional tools give you one perspective, Quantum Lens gives you seven that can't converge even if they tried.
