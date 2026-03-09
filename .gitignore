@@ -1,0 +1,8 @@
+outputs/**/*.md
+!outputs/.gitkeep
+!outputs/analyses/.gitkeep
+!outputs/solutions/.gitkeep
+_memory/
+knowledge/research/
+knowledge/explorations/
+.DS_Store

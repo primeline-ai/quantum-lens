@@ -1,0 +1,32 @@
+name: Check Personal References
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check-proper-nouns:
+    name: Check proper nouns (case-sensitive)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Grep for personal proper nouns
+        run: |
+          if grep -r --exclude-dir=.git --exclude-dir=.github "Robin\|Evolving\|Primeline\|ThriveVibes\|Auswanderungs" .; then
+            echo "::error::Found personal proper noun references"
+            exit 1
+          fi
+          echo "No personal proper nouns found."
+
+  check-paths-usernames:
+    name: Check paths and usernames (case-insensitive)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Grep for internal paths and usernames
+        run: |
+          if grep -ri --exclude-dir=.git --exclude-dir=.github "neoforce\|_memory/\|_graph/\|_stats\|_inbox\|_handoffs" .; then
+            echo "::error::Found internal path or username references"
+            exit 1
+          fi
+          echo "No internal paths or usernames found."

@@ -1,0 +1,46 @@
+{
+  "id": "quantum-lens",
+  "name": "Quantum Lens",
+  "version": "3.0.0",
+  "description": "Radical multi-perspective deconstruction + solution engineering engine",
+  "category": "analysis",
+  "agents": [
+    "intake-processor", "void-reader", "paradox-hunter", "interference-reader",
+    "boundary-dissolver", "temporal-archaeologist", "scale-shifter", "failure-romantic",
+    "reverse-engineer", "system-comparator", "adaptation-architect", "solution-synthesizer"
+  ],
+  "commands": ["quantum-lens", "lens-calibrate", "quantum-review", "quantum-solve", "quantum-full"],
+  "templates": ["analysis-template", "solution-template"],
+  "skills": [],
+  "dependencies": {
+    "mcp_optional": ["firecrawl", "kairn"],
+    "external": []
+  },
+  "workflow": {
+    "perception": {
+      "phases": [
+        { "id": 0, "name": "intake", "agent": "intake-processor", "checkpoint": false },
+        { "id": 1, "name": "diverge", "agents": ["boundary-dissolver", "temporal-archaeologist", "scale-shifter", "failure-romantic", "void-reader", "paradox-hunter"], "parallel": true, "description": "All selected lenses analyze in parallel" },
+        { "id": 2, "name": "interfere", "agent": "interference-reader", "checkpoint": false, "description": "Meta-lens reads interference patterns, finds cruxes" },
+        { "id": 3, "name": "converge", "description": "Synthesis + scoring + persistence", "checkpoint": false }
+      ]
+    },
+    "solution": {
+      "phases": [
+        { "id": "S0", "name": "intake", "description": "Mode detection + source processing" },
+        { "id": "S1", "name": "system-scan", "agent": "system-comparator", "description": "Maps source against your system" },
+        { "id": "S1.5", "name": "deep-dive", "description": "Repo-mode only, deeper analysis if relevant" },
+        { "id": "S2", "name": "engineering", "agents": ["reverse-engineer", "adaptation-architect"], "description": "Hybrid delegation - mode dependent" },
+        { "id": "S2.5", "name": "cascade", "description": "Contra-mode only, opt-in via --cascade" },
+        { "id": "S3", "name": "synthesis", "agent": "solution-synthesizer", "description": "DSV-gated scoring + devil's advocate" },
+        { "id": "S4", "name": "persist", "description": "Action gate + barrier tracking" }
+      ]
+    }
+  },
+  "knowledge": [
+    "quantum-framework", "lens-definitions", "anti-convergence-rules",
+    "instrument-procedures", "scoring-rubric", "atom-tagging-schema",
+    "solution-modes", "barrier-taxonomy", "dsv-reference"
+  ],
+  "keywords": ["quantum lens", "deconstruct", "radical analysis", "multi-perspective", "quantum analysis", "solution engine", "barrier", "reverse-engineer", "adapt", "contra"]
+}
