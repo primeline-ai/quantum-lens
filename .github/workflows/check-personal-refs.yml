@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Grep for internal paths and usernames
         run: |
-          if grep -ri --exclude-dir=.git --exclude-dir=.github "neoforce\|_memory/\|_graph/\|_stats\|_inbox\|_handoffs" .; then
+          if grep -ri --exclude-dir=.git --exclude-dir=.github --exclude=.gitignore "neoforce\|_memory/\|_graph/\|_stats\|_inbox\|_handoffs" .; then
             echo "::error::Found internal path or username references"
             exit 1
           fi
