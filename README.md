@@ -21,7 +21,7 @@ Then in your project:
 ```bash
 claude
 # /quantum-lens "AI will replace knowledge workers by 2030"
-# /quantum-solve https://github.com/example/framework
+# /quantum-solve https://github.com/primeline-ai/evolving-lite
 # /quantum-full concept: the attention economy --depth deep
 ```
 
@@ -52,7 +52,7 @@ claude
 
 ```bash
 /quantum-solve "Context window fills too fast during multi-agent tasks"
-/quantum-solve https://github.com/example/tool --mode repo
+/quantum-solve https://github.com/primeline-ai/universal-planning-framework --mode repo
 /quantum-solve "contra: you need a CS degree to build production AI" --cascade
 ```
 
