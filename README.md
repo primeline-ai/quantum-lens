@@ -1,7 +1,7 @@
 # Quantum Lens
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0-green.svg)](https://github.com/primeline-ai/quantum-lens/releases/tag/v1.0)
+[![Version](https://img.shields.io/badge/version-3.0.0-green.svg)](https://github.com/primeline-ai/quantum-lens/releases/tag/v3.0.0)
 [![Works with Claude Code](https://img.shields.io/badge/works%20with-Claude%20Code-orange.svg)](main)
 
 
@@ -32,7 +32,7 @@ claude
 
 **Two engines, not one.** Perception Engine deconstructs. Solution Engine rebuilds. `/quantum-full` chains both - wild perception filtered through hard engineering constraints. The space between observation and action is where breakthroughs happen.
 
-**Structural anti-convergence.** LLM agents prompted to "disagree" converge anyway (NeurIPS 2024). Quantum Lens enforces divergence through architecture: each lens has a computationally distinct cognitive mode, unique required output sections, and hard voice constraints. Convergence = suspicion, not confidence.
+**Structural anti-convergence.** LLM agents prompted to "disagree" converge anyway (NeurIPS 2024). Quantum Lens enforces divergence through five concrete mechanisms: (1) distinct cognitive modes per lens, (2) unique required output sections per lens, (3) voice-marker constraints that make output fingerprinting auditable, (4) atom-level tracking from intake through every lens, and (5) a mandatory inter-phase gate requiring at least one lens to contradict the naive reading before Phase 2 can start. Unanimous agreement is a failure state, not a confidence signal.
 
 **DSV-gated scoring.** Every score passes through Decompose-Suspend-Validate. No point estimates - confidence bands with stated weakest assumptions. Score says 80%? You see exactly which assumption could make it 40%.
 
@@ -132,19 +132,49 @@ With these: system-specific adaptation roadmaps with file paths.
 
 ## How It Works
 
-### Perception Pipeline
+### Perception Engine (`/quantum-lens`) - 5 Phases
+
+**Phase 0 - Intake:** Atomizes the input into 5-12 tagged atoms using AoT decomposition, each with a Markov property (self-contained). Also produces a naive reading - the obvious, surface-level interpretation that the lenses must challenge.
+
+**Phase 1 - Diverge:** 2-6 lens agents run in parallel (count depends on depth mode). An inter-phase gate enforces that at least one lens contradicts the naive reading before Phase 2 can start.
+
+**Phase 2 - Interfere:** The Interference Reader (the meta lens) runs 7 operations on the Phase 1 outputs: aggregate, constructive map (where lenses amplify each other), destructive map (where lenses cancel each other out), crux identification, isomorphism detection across lenses, an 80/20 relevance filter, and the Killer Question.
+
+**Phase 3 - Converge:** Assembles the 8-section report inline. Each insight is scored 1-10 for breakthrough potential.
+
+**Phase 4 - Persist:** Score >=7 auto-saves to Kairn (if available). Score >=9 also saves an extended analysis file.
+
 ```
-INPUT -> Intake (AoT decomposition) -> Parallel Lenses -> Interference Detection -> Synthesis
+Phase 0: Intake (AoT atoms + naive reading)
+  -> Phase 1: Diverge (2-6 parallel lenses, inter-phase gate)
+  -> Phase 2: Interfere (Interference Reader, 7 ops)
+  -> Phase 3: Converge (8-section report, 1-10 scores)
+  -> Phase 4: Persist (>=7 Kairn, >=9 extended file)
 ```
 
-### Solution Pipeline
+### Solution Engine (`/quantum-solve`) - 5 Stages
+
+**S0 - Intake:** Auto-detects mode from input: repo (URL present), problem (limitation framing), or contra ("contra:" prefix).
+
+**S1 - System Scan:** Builds overlap, gap, and collision maps against the system context files. In repo mode, a relevance score gates the rest - below 4, the engine stops rather than producing a low-signal adaptation.
+
+**S2 - Engineer:** Reverse-engineers from the goal, then produces the adaptation. Hybrid delegation: parts that benefit from web search or external tools are routed out where the tier allows.
+
+**S3 - Synthesis:** DSV gate with confidence bands (not point estimates). Includes an immutability cross-check on every stated barrier and a mandatory Devil's Advocate pass when confidence exceeds 70%.
+
+**S4 - Persist:** Each identified barrier is tracked through a 6-stage lifecycle (from assumed through mutable/temporal to immutable or broken).
+
 ```
-INPUT -> Mode Detection -> System Scan -> Engineering (reverse-engineer + adapt) -> DSV Synthesis
+S0: Intake (mode: repo / problem / contra)
+  -> S1: System Scan (overlap/gap/collision; relevance gate in repo mode)
+  -> S2: Engineer (reverse-engineer from goal + adaptation)
+  -> S3: Synthesis (DSV gate, confidence bands, Devil's Advocate)
+  -> S4: Persist (6-stage barrier lifecycle)
 ```
 
-### Combined (/quantum-full)
+### Combined (`/quantum-full`)
 ```
-INPUT -> Perception (all phases) -> Smart Filter -> Solution Engine -> Combined Report
+INPUT -> Perception (all 5 phases) -> Smart Filter -> Solution Engine -> Combined Report
 ```
 
 ## Scoring
@@ -218,7 +248,7 @@ MIT - see [LICENSE](LICENSE).
 
 | Tool | What It Does | Deep Dive |
 |------|-------------|-----------|
-| [**Evolving Lite**](https://github.com/primeline-ai/evolving-lite) | Self-improving Claude Code plugin — memory, delegation, self-correction | [Blog](https://primeline.cc/blog/knowledge-architecture) |
+| [**Evolving Lite**](https://github.com/primeline-ai/evolving-lite) | Self-improving Claude Code plugin - memory, delegation, self-correction | [Blog](https://primeline.cc/blog/knowledge-architecture) |
 | [**Kairn**](https://github.com/primeline-ai/kairn) | Persistent knowledge graph with context routing for AI | [Blog](https://primeline.cc/blog/knowledge-architecture) |
 | [**tmux Orchestration**](https://github.com/primeline-ai/claude-tmux-orchestration) | Parallel Claude Code sessions with heartbeat monitoring | [Blog](https://primeline.cc/blog/tmux-orchestration) |
 | [**UPF**](https://github.com/primeline-ai/universal-planning-framework) | 3-stage planning with adversarial hardening | [Blog](https://primeline.cc/blog/planning-framework-dsv-reasoning) |
