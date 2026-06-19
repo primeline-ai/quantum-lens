@@ -28,9 +28,9 @@ If no explicit `--depth` flag is provided, detect depth from the user's phrasing
 ## Prerequisites
 
 Read these knowledge files for framework context:
-- `.claude/scenarios/quantum-lens/knowledge/quantum-framework.md`
-- `.claude/scenarios/quantum-lens/knowledge/lens-definitions.md`
-- `.claude/scenarios/quantum-lens/knowledge/anti-convergence-rules.md`
+- `${CLAUDE_PLUGIN_ROOT}/knowledge/quantum-framework.md`
+- `${CLAUDE_PLUGIN_ROOT}/knowledge/lens-definitions.md`
+- `${CLAUDE_PLUGIN_ROOT}/knowledge/anti-convergence-rules.md`
 
 ## Workflow
 
@@ -67,7 +67,7 @@ For EACH selected lens, delegate in PARALLEL (sonnet, max_turns: 8):
 2. EXPECTED OUTCOME: Structured lens output with insights[], tunnels[], tags[], disagreements[]
 3. REQUIRED TOOLS: Read
 4. MUST DO:
-   - Read the lens agent definition from `.claude/scenarios/quantum-lens/agents/{lens}-agent.md`
+   - Read the lens agent definition from `${CLAUDE_PLUGIN_ROOT}/agents/{lens}-agent.md`
    - Apply the cognitive mode and quantum instrument specified
    - Produce 3-5 raw insights (unfiltered, wild)
    - Tag each insight with semantic type
@@ -89,7 +89,7 @@ Delegate to **interference-reader-agent** (opus, max_turns: 12):
 2. EXPECTED OUTCOME: 4-section output (Constructive Map, Destructive Map + Cruxes, Isomorphisms, Killer Question)
 3. REQUIRED TOOLS: Read
 4. MUST DO:
-   - Read `.claude/scenarios/quantum-lens/agents/interference-reader-agent.md` for full procedure
+   - Read `${CLAUDE_PLUGIN_ROOT}/agents/interference-reader-agent.md` for full procedure
    - Aggregate all lens outputs
    - Map constructive interference (convergence points)
    - Map destructive interference (contradictions)
@@ -116,7 +116,7 @@ Delegate to **interference-reader-agent** (opus, max_turns: 12):
 
 Do this INLINE (not delegated):
 
-1. Read the analysis template: `.claude/scenarios/quantum-lens/templates/analysis-template.md`
+1. Read the analysis template: `${CLAUDE_PLUGIN_ROOT}/templates/analysis-template.md`
 2. Assemble sections 1-8 following the template
 3. Select top 3-5 insights from across all lenses
 4. For each insight: concrete action path (what the user could DO)

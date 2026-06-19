@@ -26,8 +26,8 @@ If no `--mode` flag:
 ## Prerequisites
 
 Read these knowledge files for framework context:
-- `.claude/scenarios/quantum-lens/knowledge/solution-modes.md`
-- `.claude/scenarios/quantum-lens/knowledge/barrier-taxonomy.md`
+- `${CLAUDE_PLUGIN_ROOT}/knowledge/solution-modes.md`
+- `${CLAUDE_PLUGIN_ROOT}/knowledge/barrier-taxonomy.md`
 
 ## Workflow
 
@@ -86,8 +86,8 @@ Delegate to **reverse-engineer-agent** (opus, max_turns: 12) IN PARALLEL:
 
 - DELEGATED: system-comparator already ran in S1
 - INLINE (main agent): Run reverse-engineer analysis yourself. You have the conversation context - the user's problem description, the nuance of WHY this is a limitation. A sub-agent would lose this.
-  - Read `.claude/scenarios/quantum-lens/agents/reverse-engineer-agent.md` for the procedure
-  - Read `.claude/scenarios/quantum-lens/knowledge/barrier-taxonomy.md` for classification
+  - Read `${CLAUDE_PLUGIN_ROOT}/agents/reverse-engineer-agent.md` for the procedure
+  - Read `${CLAUDE_PLUGIN_ROOT}/knowledge/barrier-taxonomy.md` for classification
   - Produce: Goal Statement, Reverse Path Table, Barrier Elimination, Wavelength Change
 
 **contra-mode** (hybrid - web-search + system-comparator delegated, reverse-engineer + synthesis inline):
@@ -118,9 +118,9 @@ Delegate to **solution-synthesizer-agent** (opus, max_turns: 12):
 2. EXPECTED OUTCOME: Solution report following solution-template.md
 3. REQUIRED TOOLS: Read
 4. MUST DO:
-   - Read `.claude/scenarios/quantum-lens/knowledge/barrier-taxonomy.md`
-   - Read `.claude/scenarios/quantum-lens/agents/reverse-engineer-agent.md` (output schema)
-   - Read `.claude/scenarios/quantum-lens/templates/solution-template.md`
+   - Read `${CLAUDE_PLUGIN_ROOT}/knowledge/barrier-taxonomy.md`
+   - Read `${CLAUDE_PLUGIN_ROOT}/agents/reverse-engineer-agent.md` (output schema)
+   - Read `${CLAUDE_PLUGIN_ROOT}/templates/solution-template.md`
    - DSV gate on every score (confidence bands, not point estimates)
    - Immutability cross-check on any reclassified barriers
    - Devil's Advocate on solutions with Success > 70%

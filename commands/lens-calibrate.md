@@ -21,9 +21,9 @@ View and customize Quantum Lens configuration.
 
 ### --show (default)
 
-1. Read `.claude/scenarios/quantum-lens/scenario.json`
-2. Read `.claude/scenarios/quantum-lens/knowledge/lens-definitions.md`
-3. Read `.claude/scenarios/quantum-lens/commands/quantum-lens.md` (authoritative depth mode assignments in Phase 1)
+1. Read `${CLAUDE_PLUGIN_ROOT}/scenario.json`
+2. Read `${CLAUDE_PLUGIN_ROOT}/knowledge/lens-definitions.md`
+3. Read `${CLAUDE_PLUGIN_ROOT}/commands/quantum-lens.md` (authoritative depth mode assignments in Phase 1)
 4. Display configuration table:
 
 ```
@@ -51,7 +51,7 @@ Interactive custom lens creation:
 6. Specify required output section name
 7. Identify the anti-pattern this lens catches
 8. Generate the agent file following the existing agent template pattern
-9. Write to `.claude/scenarios/quantum-lens/agents/{lens-name}-agent.md`
+9. Write to `${CLAUDE_PLUGIN_ROOT}/agents/{lens-name}-agent.md`
 10. Update `scenario.json` agents array
 11. Update `lens-definitions.md` with new lens spec
 

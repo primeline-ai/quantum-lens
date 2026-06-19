@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "quantum-lens",
+  "version": "3.0.0",
+  "description": "Radical multi-perspective deconstruction + solution engineering engine. Perception (quantum-lens) + Solution (quantum-solve) + Combined (quantum-full) pipelines with 12 specialized agents.",
+  "author": {
+    "name": "PrimeLine AI",
+    "url": "https://primeline.cc"
+  },
+  "homepage": "https://github.com/primeline-ai/quantum-lens",
+  "repository": "https://github.com/primeline-ai/quantum-lens",
+  "license": "MIT",
+  "keywords": [
+    "quantum-lens",
+    "deconstruction",
+    "radical-analysis",
+    "multi-perspective",
+    "solution-engineering",
+    "barrier-analysis",
+    "perception",
+    "agents"
+  ]
+}

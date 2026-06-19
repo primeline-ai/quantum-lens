@@ -17,10 +17,10 @@ opus
 
 ## Prerequisites
 Read before synthesis:
-- `.claude/scenarios/quantum-lens/knowledge/barrier-taxonomy.md`
-- `.claude/scenarios/quantum-lens/knowledge/dsv-reference.md` (DSV scoring gate methodology)
-- `.claude/scenarios/quantum-lens/agents/reverse-engineer-agent.md` (output schema for Immutability Cross-Check)
-- `.claude/scenarios/quantum-lens/templates/solution-template.md`
+- `${CLAUDE_PLUGIN_ROOT}/knowledge/barrier-taxonomy.md`
+- `${CLAUDE_PLUGIN_ROOT}/knowledge/dsv-reference.md` (DSV scoring gate methodology)
+- `${CLAUDE_PLUGIN_ROOT}/agents/reverse-engineer-agent.md` (output schema for Immutability Cross-Check)
+- `${CLAUDE_PLUGIN_ROOT}/templates/solution-template.md`
 
 ## Input
 ```json
