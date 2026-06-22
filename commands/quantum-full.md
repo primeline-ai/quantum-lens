@@ -84,12 +84,20 @@ Present unified report:
 
 ### Step 6: Combined Persistence
 
-**Note**: QL Phase 4 already handles QL-specific persistence (Kairn save at score >= 7, extended analysis at >= 9). Step 6 handles SE-specific persistence ONLY. Do not re-trigger QL saves.
+**Note**: QL Phase 4 already handles QL-specific persistence via `ql_persist.py` (file always;
+Kairn + link at score >= 7; `extended` at >= 9). Step 6 handles SE-specific persistence ONLY. Do
+not re-trigger QL saves.
 
-SE Action Gate applies independently:
-- >= 70% usefulness: Auto-generate implementation plan draft
-- 40-69%: Save to outputs/solutions/
-- < 40%: Conversational only
+SE persistence follows `${CLAUDE_PLUGIN_ROOT}/knowledge/persistence.md`. Build a solution record
+(`schemas/solution_record.schema.json`) and persist it — the **file write is the guaranteed floor
+for every run**:
+```bash
+echo '<solution-record-json>' | python "${CLAUDE_PLUGIN_ROOT}/scripts/ql_persist.py" --plugin-root "${CLAUDE_PLUGIN_ROOT}"
+```
+Then apply the Action Gate on top of the always-written file:
+- **>= 70% usefulness**: also auto-generate an implementation plan draft
+- **40-69%**: if Kairn available, `kn_learn` with the returned `kairn_payload` + `--link-kairn`
+- **< 40%**: file only (already written); no Kairn, no plan draft
 
 ## FAILED Conditions
 

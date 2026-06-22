@@ -31,6 +31,7 @@ Read these knowledge files for framework context:
 - `${CLAUDE_PLUGIN_ROOT}/knowledge/quantum-framework.md`
 - `${CLAUDE_PLUGIN_ROOT}/knowledge/lens-definitions.md`
 - `${CLAUDE_PLUGIN_ROOT}/knowledge/anti-convergence-rules.md`
+- `${CLAUDE_PLUGIN_ROOT}/knowledge/persistence.md` (how Phase 4 writes outputs — read before persisting)
 
 ## Workflow
 
@@ -131,12 +132,30 @@ Do this INLINE (not delegated):
 
 ### Phase 4: Persist
 
-Based on overall Breakthrough Score:
-- Score >= 7: If Kairn available: auto-save via `kn_learn` (type: insight, tags: [quantum-lens, {domain}, {lens_names}]). If Kairn unavailable: save report to `outputs/analyses/{date}-{title}.md`
-- Score >= 9: Also save extended analysis to `outputs/analyses/`
-- Score < 7: Conversational only (no auto-save)
+Persistence follows `${CLAUDE_PLUGIN_ROOT}/knowledge/persistence.md` (read it). Do NOT hand-write
+file paths or free-form markdown — emit a structured record and let the Python helper do the IO.
 
-Always: Present the full analysis following the template (all 8 sections required).
+1. **Build the analysis record JSON** conforming to
+   `${CLAUDE_PLUGIN_ROOT}/schemas/analysis_record.schema.json` (`kind:"analysis"`, the 8 sections'
+   data as fields: `naive_reading`, `atoms[]`, `insights[]`, `interference`, `killer_question`,
+   `tunnels[]`, `superposition_view[]`, `meta_observations`, plus `overall_score`, `lenses[]`,
+   `domain`, `depth`, `input_title`). Set `extended: true` if overall score >= 9.
+2. **Persist (always — the guaranteed floor, any score):**
+   ```bash
+   echo '<record-json>' | python "${CLAUDE_PLUGIN_ROOT}/scripts/ql_persist.py" --plugin-root "${CLAUDE_PLUGIN_ROOT}"
+   ```
+   On `{ok:false, error}`, fix the record per the error and retry. Capture `record_id` and
+   `kairn_payload` from the result.
+3. **If overall score >= 7 AND Kairn available:** `kn_learn` with the returned `kairn_payload`
+   (`type`, `content`, `tags`), then link it back:
+   ```bash
+   python "${CLAUDE_PLUGIN_ROOT}/scripts/ql_persist.py" --plugin-root "${CLAUDE_PLUGIN_ROOT}" \
+     --link-kairn --record <record_id> --node <kairn_node_id> --kind analysis
+   ```
+   If Kairn is unavailable, the file write in step 2 already preserved everything — nothing else to do.
+
+Always: Present the full analysis following the template (all 8 sections required). The record/md
+are an artifact, not a replacement for the in-conversation report.
 
 ## Output
 

@@ -6,3 +6,10 @@ _memory/
 knowledge/research/
 knowledge/explorations/
 .DS_Store
+
+# Python helper bytecode
+__pycache__/
+*.py[cod]
+
+# Per-repo runtime workspace (when the plugin runs inside a host repo)
+.quantum-lens/

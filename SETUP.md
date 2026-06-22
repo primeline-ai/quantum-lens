@@ -3,6 +3,9 @@
 ## Prerequisites
 
 - [Claude Code](https://docs.anthropic.com/en/docs/build-with-claude/claude-code) installed and working
+- **Python 3.8+** on PATH (`python` or `python3`) — used by the deterministic persistence helper
+  (`scripts/ql_persist.py`). Standard library only; `jsonschema` is used for full record validation
+  if installed, otherwise a built-in check runs. No MCP required.
 - A project where you want to use Quantum Lens
 
 ## Tier 1: Core (No MCPs Required)
@@ -71,17 +74,44 @@ For Claude Desktop or Cursor, see the [Kairn setup guide](https://github.com/kai
 | `kn_recall` | Retrieve relevant past insights during new analyses |
 | `kn_query` | Search past analyses by tags, domain, or date |
 
-Without Kairn, all persistence falls back to local files in `outputs/analyses/` and `outputs/solutions/`.
+Every run **always** writes a structured record to the per-repo workspace (see Persistence below).
+Kairn is an *enhancement* on top of that: high-scoring analyses and solution candidates are also
+saved via `kn_learn` and bidirectionally linked back to the file record. Without Kairn you lose
+cross-analysis recall, not your outputs.
+
+## Persistence & Workspace
+
+Quantum Lens never writes into its (shared, read-only) install dir. All outputs and system-context
+live in a **per-repo workspace**, resolved as:
+
+1. `$QUANTUM_LENS_HOME` (explicit override), else
+2. `<your-project>/.quantum-lens/` (created on first run)
+
+```
+<your-project>/.quantum-lens/
+  outputs/index.json                       # join table: one entry per run
+  outputs/analyses/{record_id}.json|.md    # /quantum-lens
+  outputs/solutions/{record_id}.json|.md   # /quantum-solve
+  system-context/{SYSTEM-MAP,architecture,project-goals}.md
+```
+
+The LLM emits a schema-validated JSON record; `scripts/ql_persist.py` writes the canonical JSON,
+renders the markdown view deterministically, and updates `index.json`. Full contract:
+`knowledge/persistence.md`. **Add `.quantum-lens/` to your host project's `.gitignore`** (these are
+local run artifacts).
 
 ## System Context (Optional, Recommended for Solution Engine)
 
-Fill in the template files in `system-context/` to help the Solution Engine understand your system:
+On first `/quantum-solve` run the 3 template files are **auto-seeded** into
+`<your-project>/.quantum-lens/system-context/`. Fill them in to help the Solution Engine understand
+your system:
 
-1. **`system-context/SYSTEM-MAP.md`** - List your components, their locations, and purposes
-2. **`system-context/architecture.md`** - Describe how components connect and interact
-3. **`system-context/project-goals.md`** - Current goals, blockers, and priorities
+1. **`SYSTEM-MAP.md`** - List your components, their locations, and purposes
+2. **`architecture.md`** - Describe how components connect and interact
+3. **`project-goals.md`** - Current goals, blockers, and priorities
 
-Without these files, the Solution Engine operates in "general analysis mode" - reverse-engineering and barrier analysis still work, but system-specific adaptation roadmaps are skipped.
+While they remain stub/empty, the Solution Engine operates in "general analysis mode" -
+reverse-engineering and barrier analysis still work, but system-specific adaptation roadmaps are skipped.
 
 ## Model Notes
 
@@ -91,11 +121,14 @@ Without these files, the Solution Engine operates in "general analysis mode" - r
 
 ## Output Directories
 
-Quantum Lens creates output files in:
-- `outputs/analyses/` - Saved perception analyses (score >= 7, or >= 9 for extended)
-- `outputs/solutions/` - Saved solution reports and barrier logs
+Quantum Lens writes all output to the per-repo workspace (`.quantum-lens/` or `$QUANTUM_LENS_HOME`):
+- `outputs/analyses/{record_id}.{json,md}` - perception analyses (written for **every** run)
+- `outputs/solutions/{record_id}.{json,md}` - solution reports incl. classified barriers (every run)
+- `outputs/index.json` - the join table used by `/quantum-review`
 
-These directories are gitignored by default (only `.gitkeep` files are tracked).
+The JSON is the source of truth; the `.md` is a deterministic rendering. Add `.quantum-lens/` to
+your host project's `.gitignore`. (The plugin's own `outputs/.gitkeep` placeholders are unused at
+runtime — kept only so the repo tree is legible.)
 
 ## Verification
 
