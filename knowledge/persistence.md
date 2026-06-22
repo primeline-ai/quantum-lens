@@ -28,6 +28,8 @@ read of `system-context`, goes to the **workspace**. Never write under `${CLAUDE
   outputs/analyses/{record_id}.json|.md    # /quantum-lens
   outputs/solutions/{record_id}.json|.md   # /quantum-solve
   system-context/{SYSTEM-MAP,architecture,project-goals}.md   # seeded from plugin templates
+  scenario.json                            # lens-config overlay (see "Config overlay" below)
+  agents/{custom-lens}-agent.md            # custom lens bodies (built-ins stay in the plugin)
 ```
 `record_id = {date}-{slug}-{8hex}` (Python generates it; do not invent your own).
 
@@ -83,6 +85,32 @@ giving a bidirectional, machine-checkable plugin↔Kairn link joined through `in
 score, lenses[], json_path, md_path, kairn_node_id} ] }`.
 
 ---
+
+## Config overlay (lens calibration)
+
+`/lens-calibrate` must never write the read-only plugin dir. All lens config is a per-repo
+**overlay** at `.quantum-lens/scenario.json`, seeded minimal by `ql_workspace.py`:
+
+```json
+{ "depth_default": "standard",
+  "depth_map": { "quick": [...], "standard": [...], "deep": [...] },
+  "disabled_lenses": [], "custom_lenses": [ {"name": "...", "depth_modes": ["deep"]} ] }
+```
+
+The canonical default `depth_map`/`depth_default` live as constants in `ql_workspace.py`; the
+overlay carries deltas. **Lens selection is resolved deterministically by the helper, not in prompt
+prose:**
+
+- `python ql_workspace.py --lenses --depth <mode>` -> `{depth, lenses}` where
+  `lenses = depth_map[mode] − disabled_lenses + custom_lenses (whose depth_modes include mode)`.
+  Omit `--depth` to use `depth_default`.
+- `python ql_workspace.py --resolve-agent <lens> --plugin-root P` -> the lens agent path,
+  **workspace-first** (`.quantum-lens/agents/{lens}-agent.md`) then plugin fallback. So custom and
+  user-edited lenses win; built-ins still come from the plugin (updates propagate).
+
+`/quantum-lens` Phase 1 calls these; `/lens-calibrate` edits the overlay + writes custom lens bodies
+to `.quantum-lens/agents/`. `--full` (via `/quantum-init`) materializes built-in agents locally for
+editing. Built-in lens agents are otherwise never copied.
 
 ## Persistence policy (the gate)
 

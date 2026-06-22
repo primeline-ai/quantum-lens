@@ -93,12 +93,19 @@ live in a **per-repo workspace**, resolved as:
   outputs/analyses/{record_id}.json|.md    # /quantum-lens
   outputs/solutions/{record_id}.json|.md   # /quantum-solve
   system-context/{SYSTEM-MAP,architecture,project-goals}.md
+  scenario.json                            # lens-config overlay (/lens-calibrate writes here)
+  agents/{custom-lens}-agent.md            # custom lenses (built-ins stay in the plugin)
 ```
 
 The LLM emits a schema-validated JSON record; `scripts/ql_persist.py` writes the canonical JSON,
 renders the markdown view deterministically, and updates `index.json`. Full contract:
 `knowledge/persistence.md`. **Add `.quantum-lens/` to your host project's `.gitignore`** (these are
 local run artifacts).
+
+The workspace is created automatically on first use, or explicitly with **`/quantum-init`**
+(`/quantum-init --full` also copies the built-in lens agents locally for editing). `/lens-calibrate`
+reads/writes the per-repo lens-config overlay (`.quantum-lens/scenario.json`) — enabling/disabling
+or adding lenses never touches the read-only plugin install.
 
 ## System Context (Optional, Recommended for Solution Engine)
 

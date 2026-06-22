@@ -151,6 +151,38 @@ def run():
             finally:
                 del os.environ["QUANTUM_LENS_HOME"]
 
+        print("[8] lens config overlay: seed, resolution, agent precedence, --full")
+        with tempfile.TemporaryDirectory() as tdc:
+            prep = ql_workspace.prepare(PLUGIN_ROOT, cwd=tdc)
+            wsc = Path(tdc) / ".quantum-lens"
+            check(prep["seeded_config"] and (wsc / "scenario.json").exists(), "config overlay seeded")
+            check((wsc / "agents").is_dir(), "workspace agents/ dir created")
+            check(ql_workspace.resolve_lenses(wsc, "quick") == ["void-reader", "failure-romantic"],
+                  "quick base lenses resolved")
+            check(len(ql_workspace.resolve_lenses(wsc, "deep")) == 6, "deep base = 6 lenses")
+            # apply overlay: disable one, add a custom lens for deep only
+            cfg = json.loads((wsc / "scenario.json").read_text())
+            cfg["disabled_lenses"] = ["scale-shifter"]
+            cfg["custom_lenses"] = [{"name": "my-lens", "depth_modes": ["deep"]}]
+            (wsc / "scenario.json").write_text(json.dumps(cfg), encoding="utf-8")
+            deep = ql_workspace.resolve_lenses(wsc, "deep")
+            check("scale-shifter" not in deep, "disabled lens removed from deep")
+            check("my-lens" in deep, "custom lens added to deep")
+            check("my-lens" not in ql_workspace.resolve_lenses(wsc, "standard"),
+                  "custom lens absent from non-matching depth")
+            # agent resolution precedence: built-in -> plugin, override -> workspace
+            ap_builtin = ql_workspace.resolve_agent(wsc, PLUGIN_ROOT, "void-reader").replace("\\", "/")
+            check(ap_builtin.endswith("void-reader-agent.md") and "/.quantum-lens/" not in ap_builtin,
+                  "built-in lens agent resolves to plugin")
+            (wsc / "agents" / "void-reader-agent.md").write_text("custom body", encoding="utf-8")
+            ap_ws = ql_workspace.resolve_agent(wsc, PLUGIN_ROOT, "void-reader").replace("\\", "/")
+            check("/.quantum-lens/" in ap_ws, "workspace lens agent overrides plugin")
+            # --full materializes the remaining built-in agents (doesn't clobber the custom one)
+            ql_workspace.prepare(PLUGIN_ROOT, cwd=tdc, full=True)
+            check(len(list((wsc / "agents").glob("*-agent.md"))) >= 7, "--full materialized built-in agents")
+            check((wsc / "agents" / "void-reader-agent.md").read_text() == "custom body",
+                  "--full did not clobber existing workspace agent")
+
     print()
     if _failures:
         print(f"RESULT: {len(_failures)} FAILED")

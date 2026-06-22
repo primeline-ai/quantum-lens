@@ -37,9 +37,11 @@ persist), `commands/quantum-full.md` (Step 6), `commands/quantum-review.md` (ind
 `agents/solution-synthesizer-agent.md` (emit record, not file), `SETUP.md` (python prereq,
 workspace, gitignore).
 
-## Out of scope (follow-ups)
-- `/lens-calibrate` writes config into `${CLAUDE_PLUGIN_ROOT}/agents/` + mutates `scenario.json`
-  (breaks on read-only install).
+## Follow-ups
+- **DONE:** `/lens-calibrate` read-only-install bug — lens config moved to the per-repo overlay
+  `.quantum-lens/scenario.json` + `.quantum-lens/agents/`, `quantum-lens` Phase 1 now resolves lenses
+  from it (was a hardcoded no-op), and `/quantum-init` seeds the workspace. See the "Config overlay"
+  section of `knowledge/persistence.md`.
 - evolving-lite integration / Kairn-as-primary-store — the `persistence.md` Extension Point is the seam.
 
 ## Verify

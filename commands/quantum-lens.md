@@ -35,6 +35,16 @@ Read these knowledge files for framework context:
 
 ## Workflow
 
+### Phase 0a: Ensure workspace (the catch)
+
+Before anything else, ensure the per-repo workspace exists and read the lens config (per
+`${CLAUDE_PLUGIN_ROOT}/knowledge/persistence.md`):
+```bash
+python "${CLAUDE_PLUGIN_ROOT}/scripts/ql_workspace.py" --plugin-root "${CLAUDE_PLUGIN_ROOT}"
+```
+This creates `.quantum-lens/` (idempotent) and seeds the lens-config overlay if absent. (Fallback:
+`python3`.)
+
 ### Phase 0: Intake + Atomization
 
 Delegate to **intake-processor-agent** (sonnet, max_turns: 6):
@@ -57,18 +67,30 @@ Delegate to **intake-processor-agent** (sonnet, max_turns: 6):
 
 ### Phase 1: Diverge (Parallel Lens Analysis)
 
-**Depth Mode Selection**:
-- `quick`: Void Reader + Failure Romantic (2 agents)
-- `standard` (default): Void Reader + Paradox Hunter + Boundary Dissolver + Failure Romantic (4 agents)
-- `deep`: All 6 worker lenses (Void Reader, Paradox Hunter, Boundary Dissolver, Temporal Archaeologist, Scale Shifter, Failure Romantic)
+**Depth Mode Selection** — resolved from the workspace config overlay, NOT hardcoded. This honors
+`/lens-calibrate` (disabled lenses, custom lenses, `depth_default`). Run:
+```bash
+python "${CLAUDE_PLUGIN_ROOT}/scripts/ql_workspace.py" --lenses --depth {depth}
+```
+(When the user gave no `--depth` and no natural-language depth signal, omit `--depth` so the helper
+applies the configured `depth_default`.) Use the returned `lenses` list as the exact set to run.
+The defaults are quick=2, standard=4, deep=6 (canonical map lives in `ql_workspace.py`); the overlay
+may add/remove lenses.
 
-For EACH selected lens, delegate in PARALLEL (sonnet, max_turns: 8):
+Then, as the orchestrator (you have Bash), resolve each lens's agent definition path up front so the
+sub-agents need only `Read`:
+```bash
+python "${CLAUDE_PLUGIN_ROOT}/scripts/ql_workspace.py" --resolve-agent {lens} --plugin-root "${CLAUDE_PLUGIN_ROOT}"
+```
+(workspace-first, so custom/edited lenses win; built-ins fall back to the plugin).
+
+For EACH lens in the resolved list, delegate in PARALLEL (sonnet, max_turns: 8):
 
 1. TASK: Apply {lens_name} cognitive lens to the atomized input
 2. EXPECTED OUTCOME: Structured lens output with insights[], tunnels[], tags[], disagreements[]
 3. REQUIRED TOOLS: Read
 4. MUST DO:
-   - Read the lens agent definition from `${CLAUDE_PLUGIN_ROOT}/agents/{lens}-agent.md`
+   - Read the lens agent definition at the resolved path passed in CONTEXT (`{agent_path}`)
    - Apply the cognitive mode and quantum instrument specified
    - Produce 3-5 raw insights (unfiltered, wild)
    - Tag each insight with semantic type
@@ -76,7 +98,7 @@ For EACH selected lens, delegate in PARALLEL (sonnet, max_turns: 8):
    - Contradict at least 2 claims from the naive reading
    - Reference specific atom IDs as evidence
 5. MUST NOT DO: Be helpful. Be agreeable. Resolve tensions. These are perception instruments, not advisors.
-6. CONTEXT: Pass the full Phase 0 output (atoms, naive_reading, full_input, domain, divergence_level)
+6. CONTEXT: Pass the resolved `{agent_path}` for this lens, plus the full Phase 0 output (atoms, naive_reading, full_input, domain, divergence_level)
 
 **INTER-PHASE GATE**: Before Phase 2, verify:
 - PASS: At least 1 lens produced an insight contradicting the Naive Reading
