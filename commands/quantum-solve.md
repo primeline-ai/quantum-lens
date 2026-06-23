@@ -26,8 +26,9 @@ If no `--mode` flag:
 ## Prerequisites
 
 Read these knowledge files for framework context:
-- `.claude/scenarios/quantum-lens/knowledge/solution-modes.md`
-- `.claude/scenarios/quantum-lens/knowledge/barrier-taxonomy.md`
+- `${CLAUDE_PLUGIN_ROOT}/knowledge/solution-modes.md`
+- `${CLAUDE_PLUGIN_ROOT}/knowledge/barrier-taxonomy.md`
+- `${CLAUDE_PLUGIN_ROOT}/knowledge/persistence.md` (workspace resolution + how S1/S4 read & write — read before S1)
 
 ## Workflow
 
@@ -42,17 +43,29 @@ Read these knowledge files for framework context:
 
 ### S1: System Scan
 
+**First, resolve the workspace and seed system-context** (per `knowledge/persistence.md`):
+```bash
+python "${CLAUDE_PLUGIN_ROOT}/scripts/ql_workspace.py" --plugin-root "${CLAUDE_PLUGIN_ROOT}"
+```
+This prints `{system_context_dir, system_context_status, ...}` and seeds the 3 templates if absent.
+System-aware comparison runs only if at least one file is `filled`. If `system_context_status`
+shows all files `template`/`stub`/`missing` (none `filled`), note to the user that customizing the
+seeded `<workspace>/system-context/*.md` unlocks system-aware adaptation, and proceed in general
+analysis mode.
+
 Delegate to **system-comparator-agent** (sonnet, max_turns: 8):
 
 1. TASK: Map source material against your system
 2. EXPECTED OUTCOME: Overlap/Gap/Collision maps. In repo-mode: Multi-Signal Relevance Score
 3. REQUIRED TOOLS: Read, Glob, Grep
 4. MUST DO:
-   - Read `system-context/SYSTEM-MAP.md`, `system-context/architecture.md`, `system-context/project-goals.md` (if available)
+   - Read the 3 system-context files from the resolved workspace `system_context_dir`
+     (`SYSTEM-MAP.md`, `architecture.md`, `project-goals.md`) — NOT a bare relative path
    - Produce all 3 maps (Overlap, Gap, Collision)
    - In repo-mode: produce Multi-Signal Relevance Score FIRST
 5. MUST NOT DO: Speculate about system capabilities without reading files
-6. CONTEXT: Mode is `{mode}`. Source material: `{intake_output}`. Optional QL context: `{ql_insights}`
+6. CONTEXT: Mode is `{mode}`. Source material: `{intake_output}`. Workspace `system_context_dir`
+   from ql_workspace.py. Optional QL context: `{ql_insights}`
 
 **STOP GATE (repo-mode only)**: Multi-Signal Relevance < 4 -> "Not relevant enough for deep analysis." Present score and stop.
 
@@ -74,7 +87,7 @@ Delegate to **adaptation-architect-agent** (sonnet, max_turns: 8):
 1. TASK: Design concrete adaptation paths from comparator output
 2. EXPECTED OUTCOME: Priority Matrix + Quick Wins + Main Track + Deal Breakers
 3. REQUIRED TOOLS: Read, Glob, Grep
-4. MUST DO: Read system-context/SYSTEM-MAP.md (if available), reference specific file paths, include rollback for every adaptation
+4. MUST DO: Read the workspace `system-context/SYSTEM-MAP.md` (path from ql_workspace.py, if filled), reference specific file paths, include rollback for every adaptation
 5. MUST NOT DO: Produce vague recommendations without file paths
 6. CONTEXT: Comparator output: `{s1_output}`. Source material: `{source}`. Mode: repo.
 
@@ -86,8 +99,8 @@ Delegate to **reverse-engineer-agent** (opus, max_turns: 12) IN PARALLEL:
 
 - DELEGATED: system-comparator already ran in S1
 - INLINE (main agent): Run reverse-engineer analysis yourself. You have the conversation context - the user's problem description, the nuance of WHY this is a limitation. A sub-agent would lose this.
-  - Read `.claude/scenarios/quantum-lens/agents/reverse-engineer-agent.md` for the procedure
-  - Read `.claude/scenarios/quantum-lens/knowledge/barrier-taxonomy.md` for classification
+  - Read `${CLAUDE_PLUGIN_ROOT}/agents/reverse-engineer-agent.md` for the procedure
+  - Read `${CLAUDE_PLUGIN_ROOT}/knowledge/barrier-taxonomy.md` for classification
   - Produce: Goal Statement, Reverse Path Table, Barrier Elimination, Wavelength Change
 
 **contra-mode** (hybrid - web-search + system-comparator delegated, reverse-engineer + synthesis inline):
@@ -118,9 +131,9 @@ Delegate to **solution-synthesizer-agent** (opus, max_turns: 12):
 2. EXPECTED OUTCOME: Solution report following solution-template.md
 3. REQUIRED TOOLS: Read
 4. MUST DO:
-   - Read `.claude/scenarios/quantum-lens/knowledge/barrier-taxonomy.md`
-   - Read `.claude/scenarios/quantum-lens/agents/reverse-engineer-agent.md` (output schema)
-   - Read `.claude/scenarios/quantum-lens/templates/solution-template.md`
+   - Read `${CLAUDE_PLUGIN_ROOT}/knowledge/barrier-taxonomy.md`
+   - Read `${CLAUDE_PLUGIN_ROOT}/agents/reverse-engineer-agent.md` (output schema)
+   - Read `${CLAUDE_PLUGIN_ROOT}/templates/solution-template.md`
    - DSV gate on every score (confidence bands, not point estimates)
    - Immutability cross-check on any reclassified barriers
    - Devil's Advocate on solutions with Success > 70%
@@ -129,21 +142,35 @@ Delegate to **solution-synthesizer-agent** (opus, max_turns: 12):
 
 ### S4: Persist + Action
 
-Based on synthesizer's Action Gate:
-- **>= 70% usefulness**: Auto-generate implementation plan draft -> present for user approval
-- **40-69%**: Save to `outputs/solutions/` + if Kairn available: `kn_learn` (type: solution-candidate, tags: [quantum-solve, {mode}, barrier-tracking])
-- **< 40%**: Conversational only
+Persistence follows `${CLAUDE_PLUGIN_ROOT}/knowledge/persistence.md`. Emit a structured record;
+the Python helper does all IO. Do NOT hand-write file paths or free-form markdown.
 
-Barrier tracking (always):
-- If Kairn available: `kn_learn` (type: pattern, tags: [barrier:{lifecycle_stage}, {barrier_type}])
-- If Kairn unavailable: save barrier log to `outputs/solutions/{date}-{title}.md`
+1. **Build the solution record JSON** conforming to
+   `${CLAUDE_PLUGIN_ROOT}/schemas/solution_record.schema.json` (`kind:"solution"`, `mode`,
+   `input_title`, `maps`, `solution_paths[]`, `reverse_path` incl. classified `barriers[]`,
+   `roadmap`, `open_problems[]`, `executive_summary`, `usefulness_band`, `success_band`,
+   `action_gate`).
+2. **Persist (always — guaranteed floor, any usefulness):**
+   ```bash
+   echo '<record-json>' | python "${CLAUDE_PLUGIN_ROOT}/scripts/ql_persist.py" --plugin-root "${CLAUDE_PLUGIN_ROOT}"
+   ```
+   Capture `record_id` + `kairn_payload`. The record carries barrier classifications, so the
+   file write IS the barrier log — no separate file needed.
+3. **Action Gate (on top of the always-written file):**
+   - **>= 70% usefulness**: also auto-generate an implementation plan draft -> present for approval
+   - **40-69%**: if Kairn available, `kn_learn` with `kairn_payload`, then
+     `ql_persist.py --link-kairn --record <record_id> --node <node_id> --kind solution`
+   - **< 40%**: file only (already written)
+4. **Barrier tracking (when Kairn available):** additionally `kn_learn`
+   (type: pattern, tags: [barrier:{lifecycle_stage}, {barrier_type}]). When Kairn is unavailable,
+   the classified barriers in the persisted record already serve as the barrier log.
 
 Always: Present full report following `templates/solution-template.md`.
 
 ## FAILED Conditions
 
 - **S0**: Can't determine mode and no --mode flag -> ask user
-- **S1**: system-context/ files missing or empty -> switch to standalone mode (skip S1, proceed to S2 engineering)
+- **S1**: workspace system-context files are all stubs/empty (`system_context_status` shows no `filled`) -> switch to general analysis mode (skip system comparison, proceed to S2 engineering)
 - **S2**: reverse-engineer produces no barrier reclassifications -> flag for prompt review (may indicate all barriers are genuinely immutable, or prompt needs tuning)
 
 ## Output

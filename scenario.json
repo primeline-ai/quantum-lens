@@ -9,7 +9,7 @@
     "boundary-dissolver", "temporal-archaeologist", "scale-shifter", "failure-romantic",
     "reverse-engineer", "system-comparator", "adaptation-architect", "solution-synthesizer"
   ],
-  "commands": ["quantum-lens", "lens-calibrate", "quantum-review", "quantum-solve", "quantum-full"],
+  "commands": ["quantum-lens", "lens-calibrate", "quantum-review", "quantum-solve", "quantum-full", "quantum-init"],
   "templates": ["analysis-template", "solution-template"],
   "skills": [],
   "dependencies": {

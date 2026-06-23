@@ -70,6 +70,7 @@ INPUT -> QL (Phases 0-3) -> Smart Filter -> SE (S0-S4) -> Combined Report
 ```
 
 ## Commands
+- `/quantum-init` - Initialize the per-repo `.quantum-lens/` workspace (outputs, system-context, lens-config overlay; `--full` also localizes built-in lens agents)
 - `/quantum-lens <input>` - Perception analysis (8-section report)
 - `/quantum-solve <input>` - Solution engineering (7-section report)
 - `/quantum-full <input>` - Complete pipeline: perception + solution

@@ -28,11 +28,22 @@ If no explicit `--depth` flag is provided, detect depth from the user's phrasing
 ## Prerequisites
 
 Read these knowledge files for framework context:
-- `.claude/scenarios/quantum-lens/knowledge/quantum-framework.md`
-- `.claude/scenarios/quantum-lens/knowledge/lens-definitions.md`
-- `.claude/scenarios/quantum-lens/knowledge/anti-convergence-rules.md`
+- `${CLAUDE_PLUGIN_ROOT}/knowledge/quantum-framework.md`
+- `${CLAUDE_PLUGIN_ROOT}/knowledge/lens-definitions.md`
+- `${CLAUDE_PLUGIN_ROOT}/knowledge/anti-convergence-rules.md`
+- `${CLAUDE_PLUGIN_ROOT}/knowledge/persistence.md` (how Phase 4 writes outputs — read before persisting)
 
 ## Workflow
+
+### Phase 0a: Ensure workspace (the catch)
+
+Before anything else, ensure the per-repo workspace exists and read the lens config (per
+`${CLAUDE_PLUGIN_ROOT}/knowledge/persistence.md`):
+```bash
+python "${CLAUDE_PLUGIN_ROOT}/scripts/ql_workspace.py" --plugin-root "${CLAUDE_PLUGIN_ROOT}"
+```
+This creates `.quantum-lens/` (idempotent) and seeds the lens-config overlay if absent. (Fallback:
+`python3`.)
 
 ### Phase 0: Intake + Atomization
 
@@ -56,18 +67,30 @@ Delegate to **intake-processor-agent** (sonnet, max_turns: 6):
 
 ### Phase 1: Diverge (Parallel Lens Analysis)
 
-**Depth Mode Selection**:
-- `quick`: Void Reader + Failure Romantic (2 agents)
-- `standard` (default): Void Reader + Paradox Hunter + Boundary Dissolver + Failure Romantic (4 agents)
-- `deep`: All 6 worker lenses (Void Reader, Paradox Hunter, Boundary Dissolver, Temporal Archaeologist, Scale Shifter, Failure Romantic)
+**Depth Mode Selection** — resolved from the workspace config overlay, NOT hardcoded. This honors
+`/lens-calibrate` (disabled lenses, custom lenses, `depth_default`). Run:
+```bash
+python "${CLAUDE_PLUGIN_ROOT}/scripts/ql_workspace.py" --lenses --depth {depth}
+```
+(When the user gave no `--depth` and no natural-language depth signal, omit `--depth` so the helper
+applies the configured `depth_default`.) Use the returned `lenses` list as the exact set to run.
+The defaults are quick=2, standard=4, deep=6 (canonical map lives in `ql_workspace.py`); the overlay
+may add/remove lenses.
 
-For EACH selected lens, delegate in PARALLEL (sonnet, max_turns: 8):
+Then, as the orchestrator (you have Bash), resolve each lens's agent definition path up front so the
+sub-agents need only `Read`:
+```bash
+python "${CLAUDE_PLUGIN_ROOT}/scripts/ql_workspace.py" --resolve-agent {lens} --plugin-root "${CLAUDE_PLUGIN_ROOT}"
+```
+(workspace-first, so custom/edited lenses win; built-ins fall back to the plugin).
+
+For EACH lens in the resolved list, delegate in PARALLEL (sonnet, max_turns: 8):
 
 1. TASK: Apply {lens_name} cognitive lens to the atomized input
 2. EXPECTED OUTCOME: Structured lens output with insights[], tunnels[], tags[], disagreements[]
 3. REQUIRED TOOLS: Read
 4. MUST DO:
-   - Read the lens agent definition from `.claude/scenarios/quantum-lens/agents/{lens}-agent.md`
+   - Read the lens agent definition at the resolved path passed in CONTEXT (`{agent_path}`)
    - Apply the cognitive mode and quantum instrument specified
    - Produce 3-5 raw insights (unfiltered, wild)
    - Tag each insight with semantic type
@@ -75,7 +98,7 @@ For EACH selected lens, delegate in PARALLEL (sonnet, max_turns: 8):
    - Contradict at least 2 claims from the naive reading
    - Reference specific atom IDs as evidence
 5. MUST NOT DO: Be helpful. Be agreeable. Resolve tensions. These are perception instruments, not advisors.
-6. CONTEXT: Pass the full Phase 0 output (atoms, naive_reading, full_input, domain, divergence_level)
+6. CONTEXT: Pass the resolved `{agent_path}` for this lens, plus the full Phase 0 output (atoms, naive_reading, full_input, domain, divergence_level)
 
 **INTER-PHASE GATE**: Before Phase 2, verify:
 - PASS: At least 1 lens produced an insight contradicting the Naive Reading
@@ -89,7 +112,7 @@ Delegate to **interference-reader-agent** (opus, max_turns: 12):
 2. EXPECTED OUTCOME: 4-section output (Constructive Map, Destructive Map + Cruxes, Isomorphisms, Killer Question)
 3. REQUIRED TOOLS: Read
 4. MUST DO:
-   - Read `.claude/scenarios/quantum-lens/agents/interference-reader-agent.md` for full procedure
+   - Read `${CLAUDE_PLUGIN_ROOT}/agents/interference-reader-agent.md` for full procedure
    - Aggregate all lens outputs
    - Map constructive interference (convergence points)
    - Map destructive interference (contradictions)
@@ -116,7 +139,7 @@ Delegate to **interference-reader-agent** (opus, max_turns: 12):
 
 Do this INLINE (not delegated):
 
-1. Read the analysis template: `.claude/scenarios/quantum-lens/templates/analysis-template.md`
+1. Read the analysis template: `${CLAUDE_PLUGIN_ROOT}/templates/analysis-template.md`
 2. Assemble sections 1-8 following the template
 3. Select top 3-5 insights from across all lenses
 4. For each insight: concrete action path (what the user could DO)
@@ -131,12 +154,30 @@ Do this INLINE (not delegated):
 
 ### Phase 4: Persist
 
-Based on overall Breakthrough Score:
-- Score >= 7: If Kairn available: auto-save via `kn_learn` (type: insight, tags: [quantum-lens, {domain}, {lens_names}]). If Kairn unavailable: save report to `outputs/analyses/{date}-{title}.md`
-- Score >= 9: Also save extended analysis to `outputs/analyses/`
-- Score < 7: Conversational only (no auto-save)
+Persistence follows `${CLAUDE_PLUGIN_ROOT}/knowledge/persistence.md` (read it). Do NOT hand-write
+file paths or free-form markdown — emit a structured record and let the Python helper do the IO.
 
-Always: Present the full analysis following the template (all 8 sections required).
+1. **Build the analysis record JSON** conforming to
+   `${CLAUDE_PLUGIN_ROOT}/schemas/analysis_record.schema.json` (`kind:"analysis"`, the 8 sections'
+   data as fields: `naive_reading`, `atoms[]`, `insights[]`, `interference`, `killer_question`,
+   `tunnels[]`, `superposition_view[]`, `meta_observations`, plus `overall_score`, `lenses[]`,
+   `domain`, `depth`, `input_title`). Set `extended: true` if overall score >= 9.
+2. **Persist (always — the guaranteed floor, any score):**
+   ```bash
+   echo '<record-json>' | python "${CLAUDE_PLUGIN_ROOT}/scripts/ql_persist.py" --plugin-root "${CLAUDE_PLUGIN_ROOT}"
+   ```
+   On `{ok:false, error}`, fix the record per the error and retry. Capture `record_id` and
+   `kairn_payload` from the result.
+3. **If overall score >= 7 AND Kairn available:** `kn_learn` with the returned `kairn_payload`
+   (`type`, `content`, `tags`), then link it back:
+   ```bash
+   python "${CLAUDE_PLUGIN_ROOT}/scripts/ql_persist.py" --plugin-root "${CLAUDE_PLUGIN_ROOT}" \
+     --link-kairn --record <record_id> --node <kairn_node_id> --kind analysis
+   ```
+   If Kairn is unavailable, the file write in step 2 already preserved everything — nothing else to do.
+
+Always: Present the full analysis following the template (all 8 sections required). The record/md
+are an artifact, not a replacement for the in-conversation report.
 
 ## Output
 
