@@ -3,8 +3,8 @@
 Radical multi-perspective deconstruction (**Perception Engine**) + solution engineering
 (**Solution Engine**) packaged as a Claude Code plugin. This file is the architecture overview and
 the operating rules for working **inside this repo**. For the comprehensive manifest (lens catalog,
-modes, scoring, troubleshooting) see **[PMAT_README.md](PMAT_README.md)**; for install see
-**[SETUP.md](SETUP.md)**; user-facing intro is **[README.md](README.md)**.
+modes, scoring, workspace, troubleshooting) see **[README.md](README.md)**; for install see
+**[SETUP.md](SETUP.md)**.
 
 QL = observation (the wave function, all possibilities). SE = collapse (measurement, forcing
 concrete reality). `/quantum-full` is QL × SE, not QL + SE.
@@ -82,7 +82,7 @@ Full       : QL (P0–3) → smart filter → SE (S0–4) → combined report
 ```
 
 Models: orchestrating commands + Interference Reader + Solution Synthesizer use **opus**; other
-agents default to **sonnet** (see PMAT_README.md → Model Notes).
+agents default to **sonnet** (see README.md → Solution Engine Agents).
 
 ---
 
@@ -93,5 +93,5 @@ agents default to **sonnet** (see PMAT_README.md → Model Notes).
    re-hand-roll paths in command prose.
 3. The canonical lens depth map lives once, in `ql_workspace.py`. Don't re-hardcode it elsewhere.
 4. Run `make test` (or `python scripts/test_ql_persist.py`) after touching scripts/schemas.
-5. Keep docs DRY: catalogs (lenses, modes, scoring, troubleshooting) live in **PMAT_README.md**;
-   README/SETUP/CLAUDE link to it rather than duplicating.
+5. Keep docs DRY: the comprehensive catalog (lenses, modes, scoring, troubleshooting) lives in
+   **README.md** (ground truth); CLAUDE/SETUP link to it rather than duplicating.

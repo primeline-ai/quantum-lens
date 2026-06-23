@@ -1,7 +1,7 @@
 # Setup Guide
 
 Concise install guide. For the full manifest (workspace, persistence, config, troubleshooting) see
-**[PMAT_README.md](PMAT_README.md)** and `knowledge/persistence.md`. Build/test targets live in the
+**[README.md](README.md)** and `knowledge/persistence.md`. Build/test targets live in the
 **[Makefile](Makefile)** (`make help`).
 
 ## Prerequisites
