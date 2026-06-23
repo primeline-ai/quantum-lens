@@ -53,7 +53,7 @@ claude
 quantum-lens/
 ├── agents/                 # Lens agent definitions (12 agents)
 ├── assets/                 # Static assets and resources
-├── commands/               # CLI command definitions (5 quantum commands)
+├── commands/               # Slash-command definitions (6 quantum commands)
 ├── knowledge/              # Knowledge base and schemas
 │   ├── anti-convergence-rules.md
 │   ├── barrier-taxonomy.md
@@ -175,20 +175,27 @@ Every barrier is classified as one of:
 
 ## Workspace Setup
 
-On first run, Quantum Lens creates a per-repo workspace at `.quantum-lens/`:
+On first run (or via `/quantum-init`), Quantum Lens creates a per-repo workspace at
+`.quantum-lens/`. The shared plugin install dir (`${CLAUDE_PLUGIN_ROOT}`) stays read-only; ALL
+writable state lives in the workspace:
 
 ```
 .quantum-lens/
 ├── outputs/
-│   ├── analyses/          # Perception analysis records
-│   ├── solutions/         # Solution records
-│   └── index.json         # Join table for /quantum-review
+│   ├── analyses/{record_id}.{json,md}   # Perception records (json = source of truth)
+│   ├── solutions/{record_id}.{json,md}  # Solution records
+│   └── index.json                        # Join table for /quantum-review
 ├── system-context/
 │   ├── SYSTEM-MAP.md      # Your component inventory
 │   ├── architecture.md    # How components interact
 │   └── project-goals.md   # Current priorities & blockers
-└── scenario.json          # Lens config overlay (from /lens-calibrate)
+├── scenario.json          # Lens-config overlay (from /lens-calibrate)
+└── agents/                # Custom lens bodies (built-ins stay in the plugin)
 ```
+
+A record is written for **every** run (the file is the guaranteed floor); the JSON is the source of
+truth and the `.md` is rendered deterministically by `ql_persist.py`. Full contract:
+`knowledge/persistence.md`.
 
 **Recommendation:** Add `.quantum-lens/` to your `.gitignore` — these are local runtime artifacts.
 
@@ -244,11 +251,12 @@ Quantum Lens runs as a **Claude Code scenario**. To use it:
 1. Install this repository in your project (clone, symlink, or submodule)
 2. Run `claude` in your project directory
 3. Use commands:
+   - `/quantum-init` — Create/seed the per-repo `.quantum-lens/` workspace (auto-runs on first use)
    - `/quantum-lens <input>` — Perception analysis
    - `/quantum-solve <input>` — Solution engineering
    - `/quantum-full <input>` — Complete pipeline
-   - `/lens-calibrate` — Customize lenses
-   - `/quantum-review` — Review past analyses
+   - `/lens-calibrate` — Customize lenses (writes the workspace overlay, never the plugin)
+   - `/quantum-review` — Review past analyses (reads `outputs/index.json`)
 
 ## Optional Enhancements
 
@@ -272,28 +280,34 @@ kairn serve ~/brain
 
 ## Scoring & Evaluation
 
+Every run writes a record to the workspace regardless of score (the file is the guaranteed floor).
+The score only decides *additional* actions on top of that file.
+
 ### Breakthrough Score (Perception)
 1-3: Conventional reframing  
 4-6: Non-obvious connection  
-7-8: Genuine breakthrough (auto-saved)  
-9-10: Paradigm-level (extended analysis)
+7-8: Genuine breakthrough (file + Kairn `kn_learn` when available)  
+9-10: Paradigm-level (also marked `extended`)
 
 ### Usefulness Score (Solution)
 Confidence bands, not point estimates (e.g., "60-85%, medium confidence")  
-Action Gate: ≥70% auto-generates implementation draft, 40-69% saved, <40% conversational
+Action Gate (on top of the always-written file): ≥70% auto-generates an implementation draft,
+40-69% also `kn_learn` when Kairn is available, <40% file only.
 
 ## Troubleshooting
 
 ### "Workspace not found"
-Ensure `.quantum-lens/` is created via `/quantum-init` or by running any command.
+Run `/quantum-init` (or any command auto-creates `.quantum-lens/`). Override the location with
+`$QUANTUM_LENS_HOME`.
 
 ### "Schema validation failed"
-Check `jsonschema` is installed: `pip install jsonschema`  
-Fallback validation (no external deps) also available.
+`ql_persist.py` prints the offending field. `jsonschema` gives full validation
+(`pip install jsonschema`); a stdlib fallback check runs otherwise.
 
-### Lenses not loading
-Verify `.quantum-lens/scenario.json` exists (created by `/lens-calibrate`)  
-Check `agents/` directory has all 12 agent files.
+### Lenses not loading / a disabled lens still runs
+Check the resolver: `python scripts/ql_workspace.py --lenses --depth deep`. Lens selection comes
+from `.quantum-lens/scenario.json` (overlay) over the canonical defaults in `ql_workspace.py`.
+Built-in lens agents resolve from the plugin; custom/edited ones from `.quantum-lens/agents/`.
 
 ## Research Inspirations
 
