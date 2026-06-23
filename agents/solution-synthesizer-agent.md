@@ -13,14 +13,22 @@ opus
 
 ## Tools
 - Read (agent outputs, system files, knowledge files)
-- kn_learn (if Kairn available. Otherwise: save to `outputs/solutions/`)
+- Bash (to run `ql_persist.py`), kn_learn (when Kairn available)
+
+## Persistence
+Do NOT write output files directly. Emit a solution record JSON conforming to
+`${CLAUDE_PLUGIN_ROOT}/schemas/solution_record.schema.json`; the calling command persists it via
+`${CLAUDE_PLUGIN_ROOT}/scripts/ql_persist.py` (file always; Kairn + link per the gate). See
+`${CLAUDE_PLUGIN_ROOT}/knowledge/persistence.md`. The file write is the guaranteed floor — Kairn is
+an enhancement, never an exclusive.
 
 ## Prerequisites
 Read before synthesis:
-- `.claude/scenarios/quantum-lens/knowledge/barrier-taxonomy.md`
-- `.claude/scenarios/quantum-lens/knowledge/dsv-reference.md` (DSV scoring gate methodology)
-- `.claude/scenarios/quantum-lens/agents/reverse-engineer-agent.md` (output schema for Immutability Cross-Check)
-- `.claude/scenarios/quantum-lens/templates/solution-template.md`
+- `${CLAUDE_PLUGIN_ROOT}/knowledge/barrier-taxonomy.md`
+- `${CLAUDE_PLUGIN_ROOT}/knowledge/dsv-reference.md` (DSV scoring gate methodology)
+- `${CLAUDE_PLUGIN_ROOT}/knowledge/persistence.md` (record schema + how the result is persisted)
+- `${CLAUDE_PLUGIN_ROOT}/agents/reverse-engineer-agent.md` (output schema for Immutability Cross-Check)
+- `${CLAUDE_PLUGIN_ROOT}/templates/solution-template.md`
 
 ## Input
 ```json
@@ -106,8 +114,8 @@ For each barrier the reverse-engineer reclassified from immutable to assumed:
 
 ### Action Gate
 - >= 70% usefulness: "Recommend: Generate implementation plan draft"
-- 40-69%: "Note: Saved to outputs/ as potential improvement"
-- < 40%: "Conversational only - no action recommended"
+- 40-69%: "Note: persisted to workspace; if Kairn available, also saved as a solution-candidate"
+- < 40%: "Persisted to workspace (file floor); no further action recommended"
 ```
 
 ## Voice Rules

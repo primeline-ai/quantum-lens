@@ -19,9 +19,21 @@ Review past Quantum Lens analyses and surface cross-run patterns.
 
 ## Workflow
 
+### Source of truth
+
+Resolve the workspace first (per `${CLAUDE_PLUGIN_ROOT}/knowledge/persistence.md`):
+```bash
+python "${CLAUDE_PLUGIN_ROOT}/scripts/ql_workspace.py" --plugin-root "${CLAUDE_PLUGIN_ROOT}"
+```
+The deterministic record of all runs is `<workspace>/outputs/index.json` (a join table with one
+entry per analysis/solution, including `kairn_node_id`). Read it directly — do NOT scan/parse the
+rendered `.md` files. Use Kairn (`kn_query` tags `["quantum-lens"]`) to enrich entries that carry a
+`kairn_node_id`, or as a cross-machine source when the local workspace is empty.
+
 ### --list
 
-1. If Kairn available: `kn_query` with tags: ["quantum-lens"]. If Kairn unavailable: scan `outputs/analyses/` and `outputs/solutions/` directories for past reports.
+1. Read `<workspace>/outputs/index.json`; optionally enrich via `kn_query` for entries with a
+   `kairn_node_id`.
 2. Display table:
 
 ```

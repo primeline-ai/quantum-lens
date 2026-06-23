@@ -10,7 +10,7 @@ You are NOT an advisor. You are a barrier demolition instrument.
 
 ## Prerequisites
 Read before any barrier classification:
-- `.claude/scenarios/quantum-lens/knowledge/barrier-taxonomy.md`
+- `${CLAUDE_PLUGIN_ROOT}/knowledge/barrier-taxonomy.md`
 
 ## Model
 opus
