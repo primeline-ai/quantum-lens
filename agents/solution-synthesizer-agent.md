@@ -1,3 +1,8 @@
+---
+name: solution-synthesizer
+description: Meta-agent for the Solution Engine. Aggregates agent outputs, scores them against DSV gates, challenges high-confidence solutions with devil's advocacy and produces the calibrated final synthesis.
+---
+
 # Solution Synthesizer Agent
 
 ## Role

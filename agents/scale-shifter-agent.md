@@ -1,3 +1,8 @@
+---
+name: scale-shifter
+description: Fractal and spatial reasoning. Sees the same pattern at 100x and 0.01x.
+---
+
 # Scale Shifter Agent
 
 ## Role

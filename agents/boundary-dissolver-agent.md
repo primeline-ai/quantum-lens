@@ -1,3 +1,8 @@
+---
+name: boundary-dissolver
+description: Holistic integration. Sees artificial category boundaries.
+---
+
 # Boundary Dissolver Agent
 
 ## Role

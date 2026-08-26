@@ -1,3 +1,8 @@
+---
+name: intake-processor
+description: Phase 0 processor. Fetches or extracts raw input, decomposes it into Atoms of Thought, produces the naive reading, detects the domain and classifies divergence level.
+---
+
 # Intake Processor Agent
 
 ## Role

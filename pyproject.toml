@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quantum-lens"
+version = "3.0.0"
+description = "Radical multi-perspective deconstruction and solution engineering engine for Claude Code."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "PrimeLine AI", url = "https://primeline.cc" }]
+keywords = ["claude-code", "analysis", "multi-perspective", "agents"]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.urls]
+Homepage = "https://github.com/primeline-ai/quantum-lens"
+Repository = "https://github.com/primeline-ai/quantum-lens"
+
+# The shipped Python is a pair of standalone helper scripts under scripts/,
+# invoked by path from the Claude Code commands. There is no importable
+# package, so nothing is declared here - `pip install -e .` exists only so
+# the Makefile's install/dev targets resolve.
+[tool.setuptools]
+py-modules = []

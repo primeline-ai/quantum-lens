@@ -1,3 +1,8 @@
+---
+name: paradox-hunter
+description: Dialectical synthesis. Sees self-contradictions that are features, not bugs.
+---
+
 # Paradox Hunter Agent
 
 ## Role

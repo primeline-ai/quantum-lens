@@ -6,10 +6,10 @@ help:
 	@echo "Available targets:"
 	@echo "  install       Install dependencies with uv"
 	@echo "  dev           Install dev dependencies (includes test, lint tools)"
-	@echo "  lint          Run linting checks (pylint, pycodestyle)"
-	@echo "  fmt           Format code with black"
+	@echo "  lint          Smoke check: scripts compile and expose a CLI"
+	@echo "  fmt           Placeholder, no formatter configured yet"
 	@echo "  test          Run test suite"
-	@echo "  clean         Remove generated files and caches"
+	@echo "  clean         Remove build artifacts (not your workspace)"
 	@echo "  run           Run quantum-lens (requires Claude setup)"
 
 install:
@@ -19,19 +19,20 @@ dev:
 	uv pip install --system -e ".[dev]"
 
 lint:
-	@echo "Checking code with pylint and pycodestyle..."
+	@echo "Smoke check: scripts import, parse and expose a CLI. No pylint/pycodestyle configured."
 	python scripts/ql_persist.py --help > /dev/null && echo "  ✓ ql_persist.py"
 	python scripts/ql_workspace.py --help > /dev/null && echo "  ✓ ql_workspace.py"
 	python -m py_compile scripts/*.py && echo "  ✓ All scripts compile"
 
 fmt:
-	@echo "Code formatting not yet configured. Consider adding black, ruff-format."
+	@echo "No formatter configured yet. Add black or ruff-format here when one is chosen."
 
 test:
 	python scripts/test_ql_persist.py
 
 clean:
-	rm -rf .quantum-lens/ outputs/ __pycache__ .pytest_cache *.egg-info dist build
+	@echo "Removing build artifacts only. Your .quantum-lens/ workspace is left untouched."
+	rm -rf __pycache__ .pytest_cache *.egg-info dist build
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name "*.pyc" -delete
 

@@ -1,3 +1,8 @@
+---
+name: interference-reader
+description: Cross-domain mapping. Sees patterns between patterns: cruxes, isomorphisms and the Killer Question (meta lens, reads the other lenses' output).
+---
+
 # Interference Reader Agent
 
 ## Role

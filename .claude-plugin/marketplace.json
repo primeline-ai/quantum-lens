@@ -1,0 +1,15 @@
+{
+  "name": "primeline-ai",
+  "description": "PrimeLine AI plugins for Claude Code.",
+  "owner": {
+    "name": "PrimeLine AI",
+    "url": "https://primeline.cc"
+  },
+  "plugins": [
+    {
+      "name": "quantum-lens",
+      "source": "./",
+      "description": "Radical multi-perspective deconstruction and solution engineering engine: 7 perception lenses plus a solution pipeline."
+    }
+  ]
+}
