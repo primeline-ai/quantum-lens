@@ -7,6 +7,8 @@
 
 ![quantum-lens](assets/hero.png)
 
+https://github.com/user-attachments/assets/bd93fb00-85d7-4c2a-9c56-12ca387c8122
+
 **Analysis that sees what you don't.** 7 cognitive lenses run in parallel, each with a structurally distinct way of perceiving your input. Where they agree - high confidence. Where they clash - breakthrough candidates. Where conventional tools give you one perspective, Quantum Lens gives you seven that can't converge even if they tried.
 
 > "Ran /quantum-lens on our pricing strategy doc. The Void Reader found we never
